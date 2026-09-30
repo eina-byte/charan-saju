@@ -195,16 +195,16 @@ var ROM = { 목:"wood", 화:"fire", 토:"earth", 금:"metal", 수:"water" };
 
 // PERSONA 타이틀/태그라인 (charan-saju.html PERSONA 데이터와 동일 — 미리보기 텍스트용)
 var PERSONA_META = {
-  "wood-yang":  { title:"캐주얼 추구미", tagline:"편하게 걸쳐도 태 나는 사람" },
-  "wood-yin":   { title:"러블리 추구미", tagline:"청춘 로코 여주가 추구미인 사람" },
-  "fire-yang":  { title:"글램 추구미", tagline:"존재감으로 말하는 사람" },
-  "fire-yin":   { title:"로맨틱 추구미", tagline:"은은한 설렘을 주는 사람" },
-  "earth-yang": { title:"내추럴 추구미", tagline:"자연스러움이 힘인 사람" },
-  "earth-yin":  { title:"코지 추구미", tagline:"곁에 있으면 편안해지는 사람" },
-  "metal-yang": { title:"클래식 추구미", tagline:"일잘러 커리어우먼이 추구미인 사람" },
-  "metal-yin":  { title:"미니멀 추구미", tagline:"군더더기 없이 정리된 사람" },
+  "wood-yang":  { title:"동네언니 추구미", tagline:"편하게 걸쳐도 태 나는 사람" },
+  "wood-yin":   { title:"첫사랑 추구미", tagline:"청춘 로코 여주가 추구미인 사람" },
+  "fire-yang":  { title:"텐션부자 추구미", tagline:"존재감으로 말하는 사람" },
+  "fire-yin":   { title:"말랑로맨틱 추구미", tagline:"은은한 설렘을 주는 사람" },
+  "earth-yang": { title:"무해력 추구미", tagline:"자연스러움이 힘인 사람" },
+  "earth-yin":  { title:"집순이 추구미", tagline:"곁에 있으면 편안해지는 사람" },
+  "metal-yang": { title:"일잘러 추구미", tagline:"일잘러 커리어우먼이 추구미인 사람" },
+  "metal-yin":  { title:"칼정리 추구미", tagline:"고민 없이 완성하는 사람" },
   "water-yang": { title:"스트릿 추구미", tagline:"자유로운 감성이 추구미인 사람" },
-  "water-yin":  { title:"시크 추구미", tagline:"은은하게 스며드는 사람" }
+  "water-yin":  { title:"어른여자 추구미", tagline:"은은하게 스며드는 사람" }
 };
 
 function personaFromQuery(url){
