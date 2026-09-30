@@ -228,13 +228,19 @@ function personaFromQuery(url){
   }
 }
 
+// 이미지 파일(og-*.png) 내용을 바꿀 때마다 이 값을 올려주세요.
+// 카카오톡 등은 이미지 "주소"가 같으면 예전에 저장해둔 이미지를 계속
+// 재사용해서 보여주기 때문에(제목·설명 텍스트와는 별도로 캐싱됨),
+// 주소 끝에 버전값을 붙여 매번 "새 이미지"로 인식하게 만들어요.
+var ASSET_VERSION = "20260930";
+
 export default async function handler(request, context) {
   const response = await context.next();
   const url = new URL(request.url);
   const persona = personaFromQuery(url);
   if (!persona) return response; // 생년월일 파라미터가 없으면(=기본 방문) 원래 페이지 그대로
 
-  const imageUrl = url.origin + "/og/persona/og-" + persona.slug + ".png";
+  const imageUrl = url.origin + "/og/persona/og-" + persona.slug + ".png?v=" + ASSET_VERSION;
   const title = persona.meta.title + " | 차란";
   const desc = "\"" + persona.meta.tagline + "\" — 나의 사주 추구미 결과를 확인해보세요.";
 
