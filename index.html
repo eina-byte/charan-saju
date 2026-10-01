@@ -469,30 +469,20 @@
   }
   .share-card-wrap img{ display:block; width:100%; height:auto; border-radius:11px; }
 
-  /* 공유 액션 3종(카카오톡/X/링크복사)을 한 묶음으로 보이게 — 버튼 체계를 통일해요. */
+  /* 공유 액션 2종(X / 공유하기)을 한 묶음으로 보이게 — X를 맨 위 강조 액션으로,
+     공유하기(카카오톡·링크복사 등 통합)는 연보라색 보조 액션으로 둬요. */
   .share-group{ display:flex; flex-direction:column; gap:10px; margin-top:16px; }
   .share-btn{ margin-top:0; }
   .share-x{
     display:block; width:100%; box-sizing:border-box; text-align:center; text-decoration:none;
-    background:#0F1419; color:#fff; box-shadow:0 10px 22px -8px rgba(15,20,25,.4);
   }
-  .share-x:hover{ transform:translateY(-1px); }
-  .share-x:active{ transform:scale(.98); }
 
-  .copy-row{
-    display:flex; align-items:stretch; gap:0; margin-top:2px;
-    background:var(--surface); border:1.5px solid var(--border-strong); border-radius:14px; overflow:hidden;
+  .share-btn-light{
+    background:var(--tint-lavender); color:var(--primary);
+    box-shadow:none; border:1.5px solid var(--border-strong);
   }
-  .copy-row input{
-    flex:1; min-width:0; background:transparent; border:none;
-    color:var(--ink-dim); font-size:12.5px; padding:0 14px; font-family:inherit;
-  }
-  .copy-row button{
-    flex:none; appearance:none; cursor:pointer; border:none; border-left:1.5px solid var(--border-strong);
-    background:var(--surface-2); color:var(--ink); padding:12px 16px; font-size:12.5px; font-weight:700;
-    transition:background .12s ease, color .12s ease;
-  }
-  .copy-row button:hover{ background:var(--tint-lavender); color:var(--primary); }
+  .share-btn-light:hover{ background:var(--surface-2); border-color:var(--primary); box-shadow:none; }
+  .share-btn-light:active{ transform:scale(.98); box-shadow:none; }
   .copy-msg{ font-size:12px; color:var(--primary); margin-top:8px; min-height:16px; font-weight:600; }
 
   .shop-cta{
@@ -555,7 +545,7 @@
 
   <!-- SCREEN 2: INPUT -->
   <section id="screen-input" class="screen" hidden>
-    <p class="eyebrow">STEP 1</p>
+    <p class="eyebrow">Step 1</p>
     <h1 class="title" style="font-size:22px;">태어난 순간을<br>알려주세요</h1>
 
     <form id="form-birth" class="card" style="margin-top:22px;" novalidate>
@@ -600,20 +590,19 @@
 
   <!-- SCREEN 4: RESULT -->
   <section id="screen-result" class="screen" hidden>
-    <p class="eyebrow" id="result-eyebrow">RESULT</p>
+    <p class="eyebrow" id="result-eyebrow">Result</p>
     <div class="result-hero" id="result-hero">
-      <span class="pop-tag" id="result-el-name">WOOD TYPE</span>
+      <span class="pop-tag" id="result-el-name">Wood Type</span>
       <div class="pop-orb" id="result-orb"><div class="orb-inner"><img id="result-orb-img" src="" alt="" /></div></div>
       <p class="pop-daymaster" id="result-daymaster"></p>
       <p class="result-lead">네 사주에 원래 있던 <b>이 느낌</b></p>
       <h1 class="result-title" id="result-title">캐주얼 추구미</h1>
       <p class="result-quote" id="result-quote"></p>
+      <a class="cta shop-cta" id="shop-link-mid" href="#" target="_blank" rel="noopener" style="margin-top:18px;">사주 추구미 구경가기</a>
       <p class="result-impact" id="result-impact"></p>
       <div class="result-desc" id="result-desc"></div>
       <div class="chips" id="result-chips"></div>
     </div>
-
-    <a class="cta shop-cta" id="shop-link-mid" href="#" target="_blank" rel="noopener" style="margin-top:22px;">사주 추구미 구경가기</a>
 
     <div class="detail-card" id="result-detail">
       <div class="detail-block">
@@ -667,12 +656,9 @@
       <img id="share-image" alt="차란 사주 추구미 결과 카드">
     </div>
     <div class="share-group">
-      <button type="button" class="cta share-btn" id="btn-share">카카오톡으로 공유하기</button>
       <a class="cta share-x" id="share-x-link" href="#" target="_blank" rel="noopener">X(트위터)에 공유하기</a>
-      <div class="copy-row">
-        <input type="text" id="share-link" readonly aria-label="공유 링크">
-        <button type="button" id="btn-copy">링크 복사</button>
-      </div>
+      <button type="button" class="cta share-btn share-btn-light" id="btn-share">공유하기</button>
+      <input type="text" id="share-link" readonly aria-label="공유 링크" style="position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
     </div>
     <p class="copy-msg" id="copy-msg" aria-live="polite"></p>
 
@@ -1009,11 +995,11 @@
   /* ---------- 오행 메타 (컬러/한자 — 차란 브랜드 컬러 기반) ---------- */
   var STEM_HANJA = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
   var ELEMENT_META = {
-    목: { hanja:"木", romName:"WOOD", elName:"목(木)", colorHex:"#44a04b", popHex:"#86D375" },
-    화: { hanja:"火", romName:"FIRE", elName:"화(火)", colorHex:"#b01200", popHex:"#FF7A59" },
-    토: { hanja:"土", romName:"EARTH", elName:"토(土)", colorHex:"#ad8522", popHex:"#FFC93C" },
-    금: { hanja:"金", romName:"METAL", elName:"금(金)", colorHex:"#398ad6", popHex:"#6FD6E0" },
-    수: { hanja:"水", romName:"WATER", elName:"수(水)", colorHex:"#582dc0", popHex:"#6C7BFF" }
+    목: { hanja:"木", romName:"Wood", elName:"목(木)", colorHex:"#44a04b", popHex:"#86D375" },
+    화: { hanja:"火", romName:"Fire", elName:"화(火)", colorHex:"#b01200", popHex:"#FF7A59" },
+    토: { hanja:"土", romName:"Earth", elName:"토(土)", colorHex:"#ad8522", popHex:"#FFC93C" },
+    금: { hanja:"金", romName:"Metal", elName:"금(金)", colorHex:"#398ad6", popHex:"#6FD6E0" },
+    수: { hanja:"水", romName:"Water", elName:"수(水)", colorHex:"#582dc0", popHex:"#6C7BFF" }
   };
 
 
@@ -1349,7 +1335,7 @@
     heroEl.classList.remove("reveal");
     void heroEl.offsetWidth; // 리플레이를 위해 강제로 리플로우시켜요
     heroEl.classList.add("reveal");
-    document.getElementById("result-el-name").textContent = persona.romName + " TYPE";
+    document.getElementById("result-el-name").textContent = persona.romName + " Type";
     var orbImgEl = document.getElementById("result-orb-img");
     orbImgEl.src = "illust/persona/" + persona.charSlug + ".jpg";
     orbImgEl.alt = persona.title;
@@ -1606,11 +1592,12 @@
     return base + "?" + q;
   }
 
-  // "카카오톡으로 공유하기" — 카카오 SDK(KAKAO_JS_KEY)가 설정돼 있으면
-  // Kakao.Share.sendDefault()로 OS 공유 시트를 거치지 않고 카카오톡 앱으로
-  // 바로 연결해요. 키가 없거나 SDK 로드가 안 되는 환경(미리보기 등)에서는
-  // 기존 방식(OS 공유 시트 → 카카오톡 선택, 지원 안 하면 링크 복사)으로
-  // 자동 대체돼요.
+  // "공유하기" — 예전의 카카오톡 공유 + 링크복사 두 버튼을 하나로 합쳤어요.
+  // 카카오 SDK(KAKAO_JS_KEY)가 설정돼 있으면 Kakao.Share.sendDefault()로
+  // OS 공유 시트를 거치지 않고 카카오톡 앱으로 바로 연결해요. 키가 없거나
+  // SDK 로드가 안 되는 환경(미리보기 등)에서는 OS 공유 시트(카카오톡 포함
+  // 여러 앱 중 선택) → 지원 안 하면 링크 자동 복사, 순서로 자연스럽게
+  // 대체돼요.
   document.getElementById("btn-share").addEventListener("click", function(){
     var msg = document.getElementById("copy-msg");
     var shareUrl = document.getElementById("share-link").value;
@@ -1700,29 +1687,6 @@
     }catch(e){ /* 무시 */ }
   });
 
-  document.getElementById("btn-copy").addEventListener("click", function(){
-    var input = document.getElementById("share-link");
-    var msg = document.getElementById("copy-msg");
-    var done = function(ok){
-      msg.textContent = ok ? "링크를 복사했어요." : "복사에 실패했어요. 직접 선택해서 복사해주세요.";
-    };
-    input.removeAttribute("readonly");
-    input.focus(); input.select();
-    input.setSelectionRange(0, input.value.length);
-    try{
-      if (navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(input.value).then(function(){ input.setAttribute("readonly",""); done(true); })
-          .catch(function(){ tryExec(); });
-      } else { tryExec(); }
-    }catch(err){ tryExec(); }
-    function tryExec(){
-      var ok = false;
-      try{ ok = document.execCommand("copy"); }catch(e2){ ok = false; }
-      input.setAttribute("readonly","");
-      done(ok);
-    }
-  });
-
   document.getElementById("shop-link").addEventListener("click", function(e){
     if (this.getAttribute("aria-disabled") === "true"){ e.preventDefault(); }
   });
@@ -1795,7 +1759,7 @@
     // "OOO TYPE" 라벨 — 필 배지 대신 오행 포인트 컬러의 볼드 텍스트로 은은하게
     ctx.font = "800 16px 'Gothic A1', sans-serif";
     ctx.fillStyle = ACCENT; ctx.textAlign = "center";
-    ctx.fillText(persona.romName + " TYPE", W/2, 148);
+    ctx.fillText(persona.romName + " Type", W/2, 148);
 
     // 오브 배지 — 뒤로 은은한 컬러 글로우, 흰 원 위에 동그랗게 자른 일러스트
     var bx = W/2, by = 250, br = 78;
