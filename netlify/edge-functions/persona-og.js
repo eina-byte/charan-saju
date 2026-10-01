@@ -193,7 +193,7 @@ function dominantElement(counts){
 // 오행 한글 키 → 이미지 파일명(로마자)
 var ROM = { 목:"wood", 화:"fire", 토:"earth", 금:"metal", 수:"water" };
 
-// PERSONA 타이틀/태그라인 (charan-saju.html PERSONA 데이터와 동일 — 미리보기 텍스트용)
+// PERSONA 타이틀/태그라인 (charan-saju.html PERSONA 데이터와 동일 — 미리보기 텍스트와)
 var PERSONA_META = {
   "wood-yang":  { title:"동네언니 추구미", tagline:"편하게 걸쳐도 태 나는 사람" },
   "wood-yin":   { title:"첫사랑 추구미", tagline:"청춘 로코 여주가 추구미인 사람" },
@@ -204,7 +204,7 @@ var PERSONA_META = {
   "metal-yang": { title:"일잘러 추구미", tagline:"일잘러 커리어우먼이 추구미인 사람" },
   "metal-yin":  { title:"칼정리 추구미", tagline:"고민 없이 완성하는 사람" },
   "water-yang": { title:"스트릿 추구미", tagline:"자유로운 감성이 추구미인 사람" },
-  "water-yin":  { title:"어른여자 추구미", tagline:"말 많이 안 해도 뭔가 있어 보이는 사람" }
+  "water-yin":  { title:"어른여자 추구미", tagline:"분위기로 압도하는 사람" }
 };
 
 function personaFromQuery(url){
@@ -232,7 +232,7 @@ function personaFromQuery(url){
 // 카카오톡 등은 이미지 "주소"가 같으면 예전에 저장해둔 이미지를 계속
 // 재사용해서 보여주기 때문에(제목·설명 텍스트와는 별도로 캐싱됨),
 // 주소 끝에 버전값을 붙여 매번 "새 이미지"로 인식하게 만들어요.
-var ASSET_VERSION = "20261001";
+var ASSET_VERSION = "20261001b";
 
 export default async function handler(request, context) {
   const response = await context.next();
