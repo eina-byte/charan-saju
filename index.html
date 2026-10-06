@@ -1,4 +1,30 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>사주로 보는 나의 추구미 | 차란</title>
+<script>
+// GA4는 기본적으로 현재 페이지 주소(쿼리 파라미터 포함) 전체를 자동 수집해요.
+// 구버전 공유 링크(?y=&m=&d=&hh=&mm=)로 들어온 방문자가 있으면 생년월일시가
+// 그 주소에 그대로 담겨 있어서, 아래 GTM 스크립트가 로드되기도 전에(=어떤
+// 분석 태그가 몇 번째로 발동하든 상관없이) 제일 먼저 주소창에서 지워요.
+// 결과 화면 복원에 필요한 원래 값은 window.__charanLegacyBirthQS에 따로
+// 보존해뒀다가 본문 스크립트에서만 사용해요 — 분석 스크립트는 못 봐요.
+(function(){
+  try{
+    var qs = new URLSearchParams(location.search);
+    if (!qs.has("y") && !qs.has("m") && !qs.has("d") && !qs.has("hh") && !qs.has("mm")) return;
+    window.__charanLegacyBirthQS = location.search;
+    ["y","m","d","hh","mm"].forEach(function(k){ qs.delete(k); });
+    var rest = qs.toString();
+    var cleanUrl = location.pathname + (rest ? "?" + rest : "") + location.hash;
+    history.replaceState(null, "", cleanUrl);
+  }catch(e){ /* 이 브라우저에서 history API가 막혀있으면 그냥 넘어가요(치명적이지 않음) */ }
+})();
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KGCVJN2L');</script>
+<!-- End Google Tag Manager -->
 <meta name="description" content="생년월일 10초면 끝 — 태어난 순간의 오행으로 내 취향의 원형을 찾아보는 차란의 사주 스타일 테스트.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="차란">
@@ -229,6 +255,22 @@
   }
   .field input:focus{border-color:var(--primary);}
   .field input[disabled]{opacity:.45;}
+  /* 생년월일 입력 — 네이티브 <input type="date">는 연도를 다 입력해도(4자리)
+     기기·브라우저에 따라 월/일로 자동으로 안 넘어가는 경우가 있어서, 아래 시간
+     입력과 똑같이 년·월·일을 각각 독립된 select로 분리했어요. 탭으로 바로
+     다음 칸으로 넘어가고, 월/일 옵션은 달력상 실제로 있는 날짜만 보여줘요. */
+  .date-select-row{ display:flex; gap:8px; }
+  .date-select-row select{
+    flex:1; min-width:0; appearance:none;
+    background:var(--bg) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0L5 6L10 0Z" fill="%236E6580"/></svg>') no-repeat right 12px center;
+    color:var(--ink);
+    border:2px solid var(--border-strong); border-radius:12px;
+    padding:13px 26px 13px 12px; font-size:14.5px; font-family:inherit;
+    font-variant-numeric:tabular-nums;
+  }
+  .date-select-row select:invalid{ color:var(--ink-faint); }
+  .date-select-row select:focus{border-color:var(--primary);}
+  .date-select-row select#birth-year{ flex:1.25; }
   /* 시간 입력 — 네이티브 <input type="time">의 오전/오후 세그먼트가 기기·브라우저에
      따라 눌리지 않는 문제가 있어서, 오전/오후·시·분을 각각 독립된 select로 분리했어요. */
   .time-select-row{ display:flex; gap:8px; }
@@ -490,6 +532,75 @@
     margin-top:16px; letter-spacing:-.005em;
   }
   .shop-cta:not(.cta-disabled)::after{ content:"  \2192"; }
+  /* 반짝이는 하이라이트 — 버튼 안에서 대각선 빛줄기가 배경 위치(background-position)
+     애니메이션으로 스윽 지나가요. overflow:hidden 없이 배경 자체가 버튼 박스에
+     자동으로 잘리기 때문에, 바깥으로 튀어나오는 별(.cta-spark)들을 가리지 않아요.
+     + 살짝 커졌다 작아지는 숨쉬기(pulse)로 "눌러야 할 것 같은" 긴박함을 줘요. */
+  .shop-cta:not(.cta-disabled){
+    position:relative;
+    background-image:linear-gradient(115deg, transparent 38%, rgba(255,255,255,.72) 50%, transparent 62%);
+    background-size:260% 100%;
+    background-repeat:no-repeat;
+    background-position:160% 0;
+    animation: shopCtaShine 2.2s ease-in-out infinite, shopCtaPulse 1.7s ease-in-out infinite;
+  }
+  @keyframes shopCtaShine{
+    0%{ background-position:160% 0; }
+    42%{ background-position:-60% 0; }
+    100%{ background-position:-60% 0; }
+  }
+  @keyframes shopCtaPulse{
+    0%, 100%{ transform:scale(1); box-shadow:0 10px 22px -8px rgba(79,23,211,.4); }
+    50%{ transform:scale(1.025); box-shadow:0 16px 32px -6px rgba(79,23,211,.58); }
+  }
+  /* 버튼 바깥으로 번지며 사라지는 글로우 링 — 알림처럼 계속 퍼져나가요. */
+  .shop-cta:not(.cta-disabled)::before{
+    content:""; position:absolute; inset:0; border-radius:inherit;
+    box-shadow:0 0 0 0 rgba(140,100,255,.55);
+    animation: shopCtaRing 1.7s ease-out infinite;
+    pointer-events:none;
+  }
+  @keyframes shopCtaRing{
+    0%{ box-shadow:0 0 0 0 rgba(140,100,255,.55); }
+    75%, 100%{ box-shadow:0 0 0 13px rgba(140,100,255,0); }
+  }
+  /* 위/아래 가장자리를 따라 서로 반대 방향으로 흐르는 2px 반짝임 라인. */
+  .cta-edge{
+    position:absolute; left:8%; right:8%; height:2px; border-radius:2px;
+    pointer-events:none; opacity:.95;
+    background-image:linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+    background-size:44% 100%; background-repeat:no-repeat;
+  }
+  .cta-edge.top{ top:6px; animation: edgeShimmerL 2.4s linear infinite; }
+  .cta-edge.bottom{ bottom:6px; animation: edgeShimmerR 2.4s linear infinite; }
+  @keyframes edgeShimmerL{ 0%{ background-position:-60% 0; } 100%{ background-position:160% 0; } }
+  @keyframes edgeShimmerR{ 0%{ background-position:160% 0; } 100%{ background-position:-60% 0; } }
+  .shop-cta.cta-disabled .cta-edge{ display:none; }
+  /* 버튼 주변에서 팡팡 터지듯 반짝이는 별 6개 — 흰색/골드를 섞고 각자 다른
+     위치·타이밍으로 커졌다 사라지길 반복해요. */
+  .cta-spark{
+    position:absolute; pointer-events:none;
+    opacity:0; transform:scale(0) rotate(0deg);
+  }
+  .shop-cta.cta-disabled .cta-spark{ display:none; }
+  .shop-cta:not(.cta-disabled) .cta-spark{ animation: ctaSparkPop 2.2s ease-in-out infinite; }
+  .cta-spark.s1{ top:-8px; left:8%; font-size:14px; color:#fff; animation-delay:0s; }
+  .cta-spark.s2{ top:-10px; right:16%; font-size:18px; color:#FFE27A; animation-delay:.5s; }
+  .cta-spark.s3{ bottom:-9px; left:24%; font-size:12px; color:#fff; animation-delay:1s; }
+  .cta-spark.s4{ bottom:-8px; right:6%; font-size:16px; color:#FFE27A; animation-delay:1.5s; }
+  .cta-spark.s5{ top:10px; left:3%; font-size:11px; color:#fff; animation-delay:.85s; }
+  .cta-spark.s6{ bottom:9px; right:3%; font-size:13px; color:#FFE27A; animation-delay:1.9s; }
+  @keyframes ctaSparkPop{
+    0%, 100%{ opacity:0; transform:scale(0) rotate(0deg); }
+    20%{ opacity:1; transform:scale(1.3) rotate(16deg); }
+    40%{ opacity:0; transform:scale(.4) rotate(28deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .shop-cta:not(.cta-disabled){ animation:none; background-position:-60% 0; }
+    .shop-cta:not(.cta-disabled)::before{ animation:none; display:none; }
+    .cta-edge{ animation:none; display:none; }
+    .cta-spark{ animation:none; display:none; }
+  }
   .shop-cta.cta-disabled{
     background:var(--surface-2); color:var(--ink-faint);
     box-shadow:none; cursor:default;
@@ -508,7 +619,6 @@
   .biz-links a{ color:var(--ink-dim); text-decoration:underline; font-weight:600; }
   .biz-footer a{ color:inherit; text-decoration:underline; }
   .biz-footer p{ margin:6px 0 0; }
-  .restart-row{ margin-top:18px; }
   .restart-btn{
     appearance:none; width:100%; cursor:pointer;
     display:flex; align-items:center; justify-content:center; gap:6px;
@@ -522,6 +632,10 @@
   .restart-icon{ font-size:15px; line-height:1; }
 </style>
 
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KGCVJN2L"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <div class="app">
   <div class="brandbar">
@@ -550,8 +664,18 @@
 
     <form id="form-birth" class="card" style="margin-top:22px;" novalidate>
       <div class="field">
-        <label for="birth-date">생년월일</label>
-        <input type="date" id="birth-date" name="birth-date" required>
+        <label id="birth-date-label">생년월일</label>
+        <div class="date-select-row" role="group" aria-labelledby="birth-date-label">
+          <select id="birth-year" aria-label="년">
+            <option value="" disabled selected>년</option>
+          </select>
+          <select id="birth-month" aria-label="월">
+            <option value="" disabled selected>월</option>
+          </select>
+          <select id="birth-day" aria-label="일">
+            <option value="" disabled selected>일</option>
+          </select>
+        </div>
       </div>
       <div class="field" style="margin-bottom:6px;">
         <label id="birth-time-label">태어난 시간</label>
@@ -604,6 +728,8 @@
       <div class="chips" id="result-chips"></div>
     </div>
 
+    <a class="cta shop-cta" id="shop-link-mid" href="#" target="_blank" rel="noopener" style="margin-top:22px;"><span class="cta-edge top" aria-hidden="true"></span><span class="cta-edge bottom" aria-hidden="true"></span><span class="shop-cta-label">사주 추구미 구경가기</span><span class="cta-spark s1" aria-hidden="true">&#10022;</span><span class="cta-spark s2" aria-hidden="true">&#10022;</span><span class="cta-spark s3" aria-hidden="true">&#10023;</span><span class="cta-spark s4" aria-hidden="true">&#10022;</span><span class="cta-spark s5" aria-hidden="true">&#10023;</span><span class="cta-spark s6" aria-hidden="true">&#10022;</span></a>
+
     <div class="detail-card" id="result-detail">
       <div class="detail-block">
         <p class="detail-eyebrow">이 추구미, 이런 점이 강점이에요</p>
@@ -632,39 +758,44 @@
       </div>
     </div>
 
-    <a class="cta shop-cta" id="shop-link" href="#" target="_blank" rel="noopener">차란에서 이 추구미 아이템 보러가기</a>
+    <a class="cta shop-cta" id="shop-link" href="#" target="_blank" rel="noopener"><span class="cta-edge top" aria-hidden="true"></span><span class="cta-edge bottom" aria-hidden="true"></span><span class="shop-cta-label">차란에서 이 추구미 아이템 보러가기</span><span class="cta-spark s1" aria-hidden="true">&#10022;</span><span class="cta-spark s2" aria-hidden="true">&#10022;</span><span class="cta-spark s3" aria-hidden="true">&#10023;</span><span class="cta-spark s4" aria-hidden="true">&#10022;</span><span class="cta-spark s5" aria-hidden="true">&#10023;</span><span class="cta-spark s6" aria-hidden="true">&#10022;</span></a>
 
-    <div class="panel-heading">
-      <h2>내 오행 밸런스</h2>
-      <span id="chart-total-label">8기둥 기준</span>
+    <div id="chart-section">
+      <div class="panel-heading">
+        <h2>내 오행 밸런스</h2>
+        <span id="chart-total-label">8기둥 기준</span>
+      </div>
+      <div class="chart" id="chart" role="img" aria-label=""></div>
+      <details class="chart-table">
+        <summary>사주 원국 표로 보기</summary>
+        <table id="pillars-table">
+          <thead><tr><th>기둥</th><th>천간</th><th>지지</th></tr></thead>
+          <tbody id="pillars-tbody"></tbody>
+        </table>
+      </details>
     </div>
-    <div class="chart" id="chart" role="img" aria-label=""></div>
-    <details class="chart-table">
-      <summary>사주 원국 표로 보기</summary>
-      <table id="pillars-table">
-        <thead><tr><th>기둥</th><th>천간</th><th>지지</th></tr></thead>
-        <tbody id="pillars-tbody"></tbody>
-      </table>
-    </details>
 
-    <div class="panel-heading">
-      <h2>결과 공유하기</h2>
-      <span>이미지를 길게 눌러 저장해보세요</span>
+    <div id="share-section">
+      <div class="panel-heading">
+        <h2>결과 공유하기</h2>
+        <span>이미지를 길게 눌러 저장해보세요</span>
+      </div>
+      <div class="share-card-wrap">
+        <canvas id="share-canvas" width="640" height="800" style="display:none;"></canvas>
+        <img id="share-image" alt="차란 사주 추구미 결과 카드">
+      </div>
+      <div class="share-group">
+        <a class="cta share-x" id="share-x-link" href="#" target="_blank" rel="noopener">X(트위터)에 공유하기</a>
+        <button type="button" class="cta share-btn share-btn-light" id="btn-share">공유하기</button>
+        <input type="text" id="share-link" readonly aria-label="공유 링크" style="position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
+        <button class="restart-btn" id="btn-restart" type="button"><span class="restart-icon" aria-hidden="true">&#8635;</span>다른 생년월일로 다시 보기</button>
+      </div>
+      <p class="copy-msg" id="copy-msg" aria-live="polite"></p>
     </div>
-    <div class="share-card-wrap">
-      <canvas id="share-canvas" width="640" height="800" style="display:none;"></canvas>
-      <img id="share-image" alt="차란 사주 추구미 결과 카드">
-    </div>
-    <div class="share-group">
-      <a class="cta share-x" id="share-x-link" href="#" target="_blank" rel="noopener">X(트위터)에 공유하기</a>
-      <button type="button" class="cta share-btn share-btn-light" id="btn-share">공유하기</button>
-      <input type="text" id="share-link" readonly aria-label="공유 링크" style="position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
-    </div>
-    <p class="copy-msg" id="copy-msg" aria-live="polite"></p>
 
-    <div class="restart-row">
-      <button class="restart-btn" id="btn-restart" type="button"><span class="restart-icon" aria-hidden="true">&#8635;</span>다른 생년월일로 다시 보기</button>
-    </div>
+    <!-- 공유 링크로 들어온 "친구 결과 보기" 화면(생년월일 정보가 없음) 전용 CTA —
+         위 두 섹션(개인 오행 차트, 결과 공유) 대신 여기로 바로 안내해요. -->
+    <button class="cta" id="btn-try-mine" type="button" style="margin-top:22px;" hidden>내 생년월일로 추구미 확인하기</button>
 
     <footer class="note">이 결과는 전통 사주 이론을 간단히 재구성한 <b style="color:var(--ink-faint);">차란의 재미용 콘텐츠</b>예요.<br>오늘 하루, 마음이 끌리는 대로 입어보세요.</footer>
 
@@ -736,7 +867,7 @@
         entry.ready = true;
         if (lastShareArgs){ drawShareCard(lastShareArgs[0], lastShareArgs[1], lastShareArgs[2]); }
       };
-      entry.img.src = "illust/persona/" + slug + ".jpg";
+      entry.img.src = "illust/persona/" + slug + ".webp";
       PERSONA_IMG_CACHE[slug] = entry;
     }
     return entry;
@@ -963,18 +1094,39 @@
 
   function ganzhiText(p){ return STEMS[p.stem]+BRANCHES[p.branch]; }
 
-  function dominantElement(counts){
+  // 생년월일(시)로 만든 간단한 해시 — 동점일 때 항상 같은 오행(배열 순서상 첫번째)만
+  // 이기지 않도록 공평하게 섞어주는 용도예요. 같은 사람은 항상 같은 결과가 나오도록
+  // (매번 랜덤하지 않도록) 생년월일시 기반으로 고정된 값을 써요.
+  function tieBreakSeed(y,m,d,hh,mm){
+    var s = y+"-"+m+"-"+d+"-"+hh+"-"+mm;
+    var h = 0;
+    for (var i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) >>> 0; }
+    return h;
+  }
+
+  // 예전엔 동점일 때 항상 EL_KEYS 배열 순서(목>화>토>금>수)대로 첫 후보가 이겨서,
+  // 목·토 추구미가 실제보다 훨씬 자주 나오고 수(水)는 동점에서 거의 이긴 적이
+  // 없는 쏠림이 있었어요(20,000개 샘플 테스트 결과 동점 36%, 그중 수 당첨 0%).
+  // 지금은 "나 자신"을 상징하는 일간(dayStemEl)이 동점 후보에 있으면 그걸
+  // 우선하고, 그래도 없으면 생년월일시 해시로 공평하게 골라요.
+  function dominantElement(counts, dayStemEl, seed){
     var max = -1, top = [];
     EL_KEYS.forEach(function(k){ if (counts[k] > max){ max = counts[k]; } });
     EL_KEYS.forEach(function(k){ if (counts[k] === max) top.push(k); });
-    return { key: top[0], max: max, tied: top.length > 1, tiedWith: top };
+    var winner = top[0];
+    if (top.length > 1){
+      if (dayStemEl && top.indexOf(dayStemEl) !== -1){ winner = dayStemEl; }
+      else if (typeof seed === "number"){ winner = top[seed % top.length]; }
+    }
+    return { key: winner, max: max, tied: top.length > 1, tiedWith: top };
   }
 
-  function weakestElement(counts){
+  function weakestElement(counts, seed){
     var min = Infinity, bottom = [];
     EL_KEYS.forEach(function(k){ if (counts[k] < min){ min = counts[k]; } });
     EL_KEYS.forEach(function(k){ if (counts[k] === min) bottom.push(k); });
-    return { key: bottom[0], min: min, tied: bottom.length > 1, tiedWith: bottom };
+    var winner = (bottom.length > 1 && typeof seed === "number") ? bottom[seed % bottom.length] : bottom[0];
+    return { key: winner, min: min, tied: bottom.length > 1, tiedWith: bottom };
   }
 
   /* 부족한 기운을 보완해주는 짧은 스타일 팁 — 실제 사주에서 "용신을 보완한다"고
@@ -1120,7 +1272,7 @@
      아직 기획전 페이지가 없으면 빈 문자열("")로 두세요 —
      버튼이 자동으로 "기획전 준비중" 상태로 표시돼요.
      ========================================================= */
-  var SHOP_LINK = "https://www.charan.style/preview/collection/5element-my-style";
+  var SHOP_LINK = "https://www.charan.style/collection/5element-my-style";
   // 기획전 페이지의 목/화/토/금/수 탭은 각각 URL 해시(#tab-2, #tab-2-copy...)로
   // 전환돼요 — 실제 페이지에서 각 탭을 눌러보며 확인한 값이에요. 이 아이디는
   // 사이트 빌더가 자동으로 붙인 값이라 나중에 기획전 페이지를 다시 만들거나
@@ -1134,6 +1286,20 @@
     수: "tab-2-copy-copy-copy-copy"
   };
   var SHOP_LINK_TYPE_PARAM = "type"; // 기획전 쪽 쿼리 파라미터 이름 (필요하면 바꿔도 돼요)
+
+  // 기획전 이후(상품 조회~구매) 흐름은 charan-style 쪽 GA4 속성에서 이어서 봐야 해서,
+  // 이 사주 추구미 페이지에서 넘어가는 링크엔 UTM을 붙여둬요. 나중에 기획전 최종
+  // 링크(SHOP_LINK)가 바뀌어도 이 UTM 값/로직은 그대로 쓸 수 있어요 — 링크 자체가
+  // 바뀌면 위 SHOP_LINK 한 줄만 새 주소로 바꿔주면 돼요.
+  var UTM_SOURCE = "saju_chugumi";
+  var UTM_MEDIUM = "quiz_result";
+  var UTM_CAMPAIGN = "chugumi_test";
+  function addUtmParams(urlObj, contentLabel){
+    urlObj.searchParams.set("utm_source", UTM_SOURCE);
+    urlObj.searchParams.set("utm_medium", UTM_MEDIUM);
+    urlObj.searchParams.set("utm_campaign", UTM_CAMPAIGN);
+    if (contentLabel) urlObj.searchParams.set("utm_content", contentLabel);
+  }
 
   /* ---------- 화면 전환 ---------- */
   var screens = ["screen-intro","screen-input","screen-drawing","screen-result"];
@@ -1149,7 +1315,27 @@
 
   var state = { screen:"screen-intro" };
 
+  /* ---------- 분석(GA4) 이벤트 트래킹 ----------
+     GTM(태그 관리자)으로 붙이든, <head>에 gtag.js를 직접 붙이든 둘 다
+     동작하도록 두 가지를 같이 해요: (1) window.dataLayer에 {event:"이름", ...}
+     형태로 넣어서 GTM의 "맞춤 이벤트" 트리거가 잡을 수 있게 하고, (2) 혹시
+     window.gtag가 있으면(직접 설치한 경우) 그것도 같이 호출해요. 둘 다 없는
+     상태(분석 스크립트 설치 전)에서도 조용히 아무 일 없이 넘어가요 — 생년월일시
+     같은 입력값은 절대 넘기지 않고 결과(추구미 타입·오행 등)만 넘겨요. */
+  function trackEvent(name, params){
+    try{
+      window.dataLayer = window.dataLayer || [];
+      var row = { event: name };
+      if (params){ for (var k in params){ if (params.hasOwnProperty(k)) row[k] = params[k]; } }
+      window.dataLayer.push(row);
+    }catch(e){ /* ignore */ }
+    try{
+      if (typeof window.gtag === "function"){ window.gtag("event", name, params || {}); }
+    }catch(e){ /* ignore */ }
+  }
+
   document.getElementById("btn-start").addEventListener("click", function(){
+    trackEvent("test_start");
     showScreen("screen-input");
   });
 
@@ -1195,33 +1381,96 @@
     minuteEl.value = String(mm).padStart(2,"0");
   }
 
-  (function setDateBounds(){
-    var d = new Date();
-    var pad = function(n){ return String(n).padStart(2,"0"); };
-    var todayStr = d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
-    var dateEl = document.getElementById("birth-date");
-    dateEl.max = todayStr;
-    dateEl.min = "1930-01-01";
+  // 생년월일 년/월/일 select — 네이티브 <input type="date">의 연도 입력 후
+  // 월/일로 자동으로 안 넘어가는 문제를 없애려고, 시간 입력과 같은 방식의
+  // 독립된 select 3개로 바꿨어요. 월/일 옵션은 선택된 연/월 기준 실제
+  // 달력에 있는 날짜만 보여주고(2월 30일 같은 값은 애초에 선택 불가),
+  // 미래 날짜는 고를 수 없게 연도/월을 오늘 기준으로 제한해요.
+  (function initBirthDateSelects(){
+    var yearEl = document.getElementById("birth-year");
+    var monthEl = document.getElementById("birth-month");
+    var dayEl = document.getElementById("birth-day");
+    var today = new Date();
+    var curY = today.getFullYear(), curM = today.getMonth()+1, curD = today.getDate();
 
-    // 데스크탑 브라우저에서는 달력 아이콘을 정확히 눌러야만 달력이 열려서
-    // 불편했어요 — 아이콘 쪽을 누르면 바로 달력이 뜨게 해요. 다만 필드
-    // 전체에 걸어두면 연/월/일 숫자를 직접 입력하려고 클릭했을 때도 달력이
-    // 열려버려서 타이핑이 막히는 문제가 있었어요 — 그래서 아이콘이 있는
-    // 오른쪽 영역을 클릭했을 때만 열리게 좁혀요.
-    dateEl.addEventListener("click", function(e){
-      var rect = dateEl.getBoundingClientRect();
-      var iconZone = 36; // 네이티브 달력 아이콘이 보통 차지하는 오른쪽 폭(px)
-      var clickX = e.clientX - rect.left;
-      if (clickX < rect.width - iconZone) return; // 아이콘 밖이면 기본 동작(직접 입력) 유지
-      try{ if (typeof dateEl.showPicker === "function") dateEl.showPicker(); }catch(e){ /* 지원 안 하는 브라우저는 기본 동작 그대로 */ }
-    });
+    for (var y = curY; y >= 1930; y--){
+      var oy = document.createElement("option");
+      oy.value = String(y); oy.textContent = y + "년";
+      yearEl.appendChild(oy);
+    }
+
+    function refreshMonths(){
+      var y = parseInt(yearEl.value, 10);
+      var maxM = (y === curY) ? curM : 12;
+      var keep = monthEl.value;
+      monthEl.innerHTML = "";
+      var ph = document.createElement("option");
+      ph.value = ""; ph.disabled = true; ph.textContent = "월";
+      monthEl.appendChild(ph);
+      var found = false;
+      for (var m = 1; m <= maxM; m++){
+        var om = document.createElement("option");
+        om.value = String(m); om.textContent = m + "월";
+        if (String(m) === keep){ om.selected = true; found = true; }
+        monthEl.appendChild(om);
+      }
+      if (!found) ph.selected = true;
+    }
+
+    function refreshDays(){
+      var y = parseInt(yearEl.value, 10);
+      var m = parseInt(monthEl.value, 10);
+      var maxD = (y && m) ? new Date(y, m, 0).getDate() : 31;
+      if (y === curY && m === curM) maxD = Math.min(maxD, curD);
+      var keep = dayEl.value;
+      dayEl.innerHTML = "";
+      var ph = document.createElement("option");
+      ph.value = ""; ph.disabled = true; ph.textContent = "일";
+      dayEl.appendChild(ph);
+      var found = false;
+      for (var d = 1; d <= maxD; d++){
+        var od = document.createElement("option");
+        od.value = String(d); od.textContent = d + "일";
+        if (String(d) === keep){ od.selected = true; found = true; }
+        dayEl.appendChild(od);
+      }
+      if (!found) ph.selected = true;
+    }
+
+    refreshMonths();
+    refreshDays();
+    yearEl.addEventListener("change", function(){ refreshMonths(); refreshDays(); });
+    monthEl.addEventListener("change", refreshDays);
+
+    window.setBirthDateSelects = function(y, m, d){
+      yearEl.value = String(y);
+      refreshMonths();
+      monthEl.value = String(m);
+      refreshDays();
+      dayEl.value = String(d);
+    };
+    window.resetBirthDateSelects = function(){
+      // select.value를 먼저 비워야 refreshMonths/refreshDays가 "이전 값 유지" 로직으로
+      // 다시 선택해버리지 않아요 — 네이티브 form.reset()은 동적으로 새로 만든
+      // <option>에는 적용이 안 돼서 직접 비워줘요.
+      yearEl.value = "";
+      monthEl.value = "";
+      dayEl.value = "";
+      refreshMonths();
+      refreshDays();
+    };
+    window.getBirthDateValue = function(){
+      if (!yearEl.value || !monthEl.value || !dayEl.value) return "";
+      var pad = function(n){ return String(n).padStart(2,"0"); };
+      return yearEl.value + "-" + pad(monthEl.value) + "-" + pad(dayEl.value);
+    };
   })();
 
   document.getElementById("form-birth").addEventListener("submit", function(e){
     e.preventDefault();
     var errEl = document.getElementById("form-error");
     errEl.textContent = "";
-    var dateVal = document.getElementById("birth-date").value;
+    var dateVal = window.getBirthDateValue();
     if (!dateVal){ errEl.textContent = "생년월일을 입력해주세요."; return; }
     var parts = dateVal.split("-").map(Number);
     var y = parts[0], m = parts[1], d = parts[2];
@@ -1241,6 +1490,9 @@
     }
 
     state.birth = { y:y,m:m,d:d,hh:hh,mm:mm,hourKnown:hourKnown };
+    // GA4에는 생년월일시 자체(y/m/d/hh/mm)는 절대 넘기지 않고, "시간을 아는지
+    // 여부"만 넘겨요 — 입력값이 아니라 결과/행동 단위로만 이벤트를 남기기 위해서예요.
+    trackEvent("input_complete", { hour_known: hourKnown });
     runDrawing();
   });
 
@@ -1302,8 +1554,19 @@
   }
 
   function renderResult(birth){
+    // 공유 링크(?r=...)로 들어와서 "친구 결과 보기" 화면이 떠있던 상태였을 수 있으니,
+    // 실제 내 생년월일로 결과를 볼 땐 숨겨뒀던 섹션들을 다시 보여줘요.
+    document.getElementById("chart-section").hidden = false;
+    document.getElementById("share-section").hidden = false;
+    document.getElementById("shop-link").hidden = false;
+    document.getElementById("btn-try-mine").hidden = true;
+
     var saju = computeSaju(birth.y, birth.m, birth.d, birth.hh, birth.mm, birth.hourKnown);
-    var dom = dominantElement(saju.counts);
+    // 동점일 때 EL_KEYS 배열 순서(목>화>토>금>수)대로 항상 같은 오행이 이기던 걸
+    // 고쳤어요 — "나 자신"을 상징하는 일간(일주의 천간) 오행이 동점 후보에 있으면
+    // 그걸 우선하고, 없으면 생년월일시 해시로 공평하게 골라요.
+    var tieSeed = tieBreakSeed(birth.y, birth.m, birth.d, birth.hourKnown?birth.hh:12, birth.hourKnown?birth.mm:0);
+    var dom = dominantElement(saju.counts, STEM_EL[saju.pillars[2].p.stem], tieSeed);
     var dayStemIdx = saju.pillars[2].p.stem; // 일주(日柱)의 천간 = 일간(日干), "나"를 상징
     var yy = (dayStemIdx % 2 === 0) ? "양" : "음";
     var meta = ELEMENT_META[dom.key];
@@ -1337,7 +1600,7 @@
     heroEl.classList.add("reveal");
     document.getElementById("result-el-name").textContent = persona.romName + " Type";
     var orbImgEl = document.getElementById("result-orb-img");
-    orbImgEl.src = "illust/persona/" + persona.charSlug + ".jpg";
+    orbImgEl.src = "illust/persona/" + persona.charSlug + ".webp";
     orbImgEl.alt = persona.title;
     document.getElementById("result-daymaster").textContent = persona.subtitle;
     document.getElementById("result-title").textContent = persona.title;
@@ -1394,7 +1657,7 @@
     document.getElementById("chart-total-label").textContent = saju.total + "기둥 기준";
     buildChart(saju.counts, saju.total, dom.key);
     buildPillarsTable(saju.pillars);
-    var weak = weakestElement(saju.counts);
+    var weak = weakestElement(saju.counts, tieSeed >>> 3);
     var hasLack = weak.min !== dom.max;
     buildBoostHero(weak, dom);
 
@@ -1417,6 +1680,7 @@
       try{
         var midObj = new URL(SHOP_LINK, location.href);
         midObj.searchParams.set(SHOP_LINK_TYPE_PARAM, persona.romName.toLowerCase());
+        addUtmParams(midObj, "shop-link-mid");
         // "구경가기" 버튼: 추구미(페르소나)별 전용 앵커가 아직 페이지에 없어서,
         // 대신 이 결과의 주(主) 오행에 해당하는 오행 탭으로 연결해요 (임시 대안).
         var domTabHash = SHOP_TAB_HASH[dom.key];
@@ -1425,6 +1689,7 @@
 
         var mainObj = new URL(SHOP_LINK, location.href);
         mainObj.searchParams.set(SHOP_LINK_TYPE_PARAM, persona.romName.toLowerCase());
+        addUtmParams(mainObj, "shop-link");
         if (hasLack){
           mainObj.searchParams.set("boost", ELEMENT_META[weak.key].romName.toLowerCase());
           var tabHash = SHOP_TAB_HASH[weak.key];
@@ -1435,16 +1700,17 @@
     }
 
     var shopLink = document.getElementById("shop-link");
+    var shopLinkLabel = shopLink.querySelector(".shop-cta-label");
     if (shopUrlMain){
       shopLink.href = shopUrlMain;
       shopLink.removeAttribute("aria-disabled");
       shopLink.classList.remove("cta-disabled");
-      shopLink.textContent = hasLack ? "부족한 오행 채우러 가기" : "사주 추구미 구경가기";
+      shopLinkLabel.textContent = hasLack ? "부족한 오행 채우러 가기" : "사주 추구미 구경가기";
     } else {
       shopLink.href = "#";
       shopLink.setAttribute("aria-disabled","true");
       shopLink.classList.add("cta-disabled");
-      shopLink.textContent = hasLack ? "기획전 준비중이에요" : persona.elName+" 기획전 준비중이에요";
+      shopLinkLabel.textContent = hasLack ? "기획전 준비중이에요" : persona.elName+" 기획전 준비중이에요";
     }
 
     // 결과 설명이 길어지면서, 끝까지 스크롤 안 해도 바로 기획전으로 넘어갈 수
@@ -1461,7 +1727,7 @@
       shopLinkMid.hidden = true;
     }
 
-    var shareUrl = buildShareUrl(birth);
+    var shareUrl = buildShareUrl(persona);
     document.getElementById("share-link").value = shareUrl;
     state.shareText = "나는 \"" + persona.title + "\"래! 너의 추구미는 뭘까?";
     var xIntent = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(state.shareText) + "&url=" + encodeURIComponent(shareUrl);
@@ -1474,6 +1740,15 @@
         document.fonts.ready.then(function(){ drawShareCard(persona, weak, dom); });
       }
     }catch(e){ /* ignore */ }
+
+    // GA4에는 생년월일시가 아니라 "결과"만 넘겨요 — 추구미 타입 · 주 오행 · 부족한
+    // 오행. dom.tied(동점)였는지도 같이 보내면 나중에 결과 분포를 점검하기 좋아요.
+    trackEvent("result_view", {
+      persona_type: persona.charSlug,
+      element: dom.key,
+      weak_element: weak.key,
+      element_tied: !!dom.tied
+    });
 
     showScreen("screen-result");
   }
@@ -1585,11 +1860,13 @@
     subEl.textContent = subText;
   }
 
-  function buildShareUrl(birth){
+  // 공유 링크엔 생년월일시를 그대로 담지 않아요 — X 등에 공유했을 때 생년월일이
+  // 평문으로 노출되는 걸 막기 위해, "결과(페르소나) 코드"만 담아요(예: ?r=wood-yang).
+  // 링크를 열어본 사람은 그 결과 카드(타이틀/설명/아이템 등)만 보고, 개인 오행
+  // 차트·표처럼 실제 생년월일이 있어야 계산되는 부분은 보이지 않아요.
+  function buildShareUrl(persona){
     var base = location.href.split("?")[0].split("#")[0];
-    var q = "y="+birth.y+"&m="+birth.m+"&d="+birth.d;
-    if (birth.hourKnown) q += "&hh="+birth.hh+"&mm="+birth.mm;
-    return base + "?" + q;
+    return base + "?r=" + encodeURIComponent(persona.charSlug);
   }
 
   // "공유하기" — 예전의 카카오톡 공유 + 링크복사 두 버튼을 하나로 합쳤어요.
@@ -1619,6 +1896,7 @@
             link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
           }]
         });
+        trackEvent("share_click", { method: "kakao" });
         return;
       }
     }catch(e){ /* SDK 오류 시 아래 기존 방식으로 폴백 */ }
@@ -1630,10 +1908,12 @@
         }
       }catch(e){ /* ignore */ }
       msg.textContent = note;
+      trackEvent("share_click", { method: "link_copy" });
     }
 
     function shareLinkOnly(){
       if (navigator.share){
+        trackEvent("share_click", { method: "native_share" });
         navigator.share({ title: shareTitle, text: shareText, url: shareUrl })
           .catch(function(err){
             if (err && err.name === "AbortError") return;
@@ -1650,6 +1930,7 @@
     try{
       var file = shareBlob ? new File([shareBlob], "charan-chugumi.png", { type: "image/png" }) : null;
       if (file && navigator.canShare && navigator.canShare({ files:[file] })){
+        trackEvent("share_click", { method: "native_share" });
         navigator.share({ files:[file], title: shareTitle, text: shareText, url: shareUrl })
           .catch(function(err){
             if (err && err.name === "AbortError") return;
@@ -1675,6 +1956,7 @@
   // 단계 없이요. preventDefault를 쓰지 않아서 href(X 인텐트 링크) 이동은
   // 그대로 진행되고, 클립보드 복사는 그 위에 조용히 얹혀요.
   document.getElementById("share-x-link").addEventListener("click", function(){
+    trackEvent("share_click", { method: "twitter" });
     try{
       if (shareBlob && navigator.clipboard && window.ClipboardItem){
         navigator.clipboard.write([ new ClipboardItem({ "image/png": shareBlob }) ])
@@ -1688,18 +1970,31 @@
   });
 
   document.getElementById("shop-link").addEventListener("click", function(e){
-    if (this.getAttribute("aria-disabled") === "true"){ e.preventDefault(); }
+    if (this.getAttribute("aria-disabled") === "true"){ e.preventDefault(); return; }
+    trackEvent("shop_cta_click", { button_id: "shop-link", persona_type: state.persona && state.persona.charSlug });
   });
 
   document.getElementById("shop-link-mid").addEventListener("click", function(e){
-    if (this.getAttribute("aria-disabled") === "true"){ e.preventDefault(); }
+    if (this.getAttribute("aria-disabled") === "true"){ e.preventDefault(); return; }
+    trackEvent("shop_cta_click", { button_id: "shop-link-mid", persona_type: state.persona && state.persona.charSlug });
   });
 
-  document.getElementById("btn-restart").addEventListener("click", function(){
+  function resetToInputScreen(){
     document.getElementById("form-birth").reset();
+    window.resetBirthDateSelects();
     timeSelectEls.forEach(function(el){ el.disabled = false; });
     document.getElementById("form-error").textContent = "";
     showScreen("screen-input");
+  }
+
+  document.getElementById("btn-restart").addEventListener("click", function(){
+    trackEvent("restart_click");
+    resetToInputScreen();
+  });
+
+  document.getElementById("btn-try-mine").addEventListener("click", function(){
+    trackEvent("try_mine_click", { persona_type: state.persona && state.persona.charSlug });
+    resetToInputScreen();
   });
 
   /* ---------- 공유 카드(canvas) 그리기 ---------- */
@@ -1970,18 +2265,138 @@
     return lines;
   }
 
+  /* ---------- 공유 링크(?r=wood-yang 등)로 들어온 "친구 결과 보기" 화면 ----------
+     생년월일시를 전혀 모르는 상태로, 페르소나 코드만 가지고 결과 카드를 보여줘요.
+     개인 오행 차트·표·부족한 기운·공유 패널처럼 실제 생년월일이 있어야 계산되는
+     부분은 숨기고, 대신 "내 생년월일로 추구미 확인하기" 버튼으로 안내해요. */
+  var ROM_TO_EL = { wood:"목", fire:"화", earth:"토", metal:"금", water:"수" };
+  function renderSharedPersonaResult(elKey, yy){
+    var meta = ELEMENT_META[elKey];
+    var variant = PERSONA[elKey][yy];
+    var persona = {
+      elKey: elKey, hanja: meta.hanja, romName: meta.romName, elName: meta.elName, colorHex: meta.colorHex,
+      popHex: meta.popHex, yy: yy,
+      title: variant.title, tagline: variant.tagline, desc: variant.desc, keywords: variant.keywords,
+      strengthTip: variant.strengthTip, bestFor: variant.bestFor, actions: variant.actions, items: variant.items,
+      subtitle: meta.elName + "(" + meta.hanja + ") · " + yy + "(" + (yy==="양"?"陽":"陰") + ")의 기운"
+    };
+    persona.charSlug = meta.romName.toLowerCase() + "-" + (yy === "양" ? "yang" : "yin");
+    state.saju = null; state.dominant = null; state.persona = persona; state.yy = yy;
+    // 친구가 공유한 결과를 보는 화면이라, 이 기기에 저장된 "내 마지막 결과"는
+    // 덮어쓰지 않아요(localStorage.setItem 호출 없음).
+
+    var heroEl = document.getElementById("result-hero");
+    var illustAccent = ILLUST_ACCENT_HEX[persona.charSlug] || persona.colorHex;
+    heroEl.style.setProperty("--accent-pop", persona.popHex);
+    heroEl.style.setProperty("--accent-wash", mixWithWhite(illustAccent, .82));
+    heroEl.style.setProperty("--accent-glow", mixWithWhite(persona.popHex, .55));
+    heroEl.style.setProperty("--accent-edge", EDGE_HEX[persona.charSlug] || "#fff");
+    heroEl.style.setProperty("--accent-strong", illustAccent);
+    heroEl.classList.remove("reveal");
+    void heroEl.offsetWidth;
+    heroEl.classList.add("reveal");
+    document.getElementById("result-el-name").textContent = persona.romName + " Type";
+    var orbImgEl = document.getElementById("result-orb-img");
+    orbImgEl.src = "illust/persona/" + persona.charSlug + ".webp";
+    orbImgEl.alt = persona.title;
+    document.getElementById("result-daymaster").textContent = persona.subtitle;
+    document.getElementById("result-title").textContent = persona.title;
+    document.getElementById("result-quote").textContent = "“" + persona.tagline + "”";
+    document.getElementById("result-desc").innerHTML = persona.desc;
+    document.getElementById("result-impact").innerHTML = "친구가 공유한 결과예요 — <b>" + persona.title + "</b>는 " + meta.elName + " 기운이 가장 강할 때 나오는 타입이에요.";
+
+    var chipsEl = document.getElementById("result-chips");
+    chipsEl.innerHTML = "";
+    persona.keywords.forEach(function(k, idx){
+      var c = document.createElement("span");
+      c.className = "chip"; c.textContent = k;
+      c.style.background = (idx % 2 === 0) ? "var(--primary)" : "var(--pop-ink)";
+      chipsEl.appendChild(c);
+    });
+
+    document.getElementById("detail-strength").innerHTML = persona.strengthTip;
+    document.getElementById("detail-bestfor").innerHTML = persona.bestFor;
+    var actionsEl = document.getElementById("detail-actions");
+    actionsEl.innerHTML = "";
+    persona.actions.forEach(function(a, idx){
+      var li = document.createElement("li");
+      var n = document.createElement("span"); n.className = "n"; n.textContent = String(idx + 1);
+      var t = document.createElement("span"); t.textContent = a;
+      li.appendChild(n); li.appendChild(t);
+      actionsEl.appendChild(li);
+    });
+    var itemsEl = document.getElementById("detail-items");
+    itemsEl.innerHTML = "";
+    persona.items.forEach(function(it){
+      var tag = document.createElement("span"); tag.className = "item-tag"; tag.textContent = it;
+      itemsEl.appendChild(tag);
+    });
+
+    document.getElementById("chart-section").hidden = true;
+    document.getElementById("share-section").hidden = true;
+    document.getElementById("btn-try-mine").hidden = false;
+
+    var shopLinkMid = document.getElementById("shop-link-mid");
+    var shopLinkMidLabel = shopLinkMid.querySelector(".shop-cta-label");
+    var shopUrlMid = "";
+    if (SHOP_LINK){
+      try{
+        var midObj = new URL(SHOP_LINK, location.href);
+        midObj.searchParams.set(SHOP_LINK_TYPE_PARAM, persona.romName.toLowerCase());
+        addUtmParams(midObj, "shop-link-mid-shared");
+        var domTabHash = SHOP_TAB_HASH[elKey];
+        if (domTabHash){ midObj.hash = domTabHash; }
+        shopUrlMid = midObj.toString();
+      }catch(e){ shopUrlMid = SHOP_LINK; }
+    }
+    if (shopUrlMid){
+      shopLinkMid.href = shopUrlMid;
+      shopLinkMid.removeAttribute("aria-disabled");
+      shopLinkMid.classList.remove("cta-disabled");
+      shopLinkMid.hidden = false;
+    } else {
+      shopLinkMid.href = "#";
+      shopLinkMid.setAttribute("aria-disabled","true");
+      shopLinkMidLabel.textContent = persona.elName + " 기획전 준비중이에요";
+      shopLinkMid.hidden = true;
+    }
+    document.getElementById("shop-link").hidden = true;
+
+    trackEvent("shared_link_visit", { persona_type: persona.charSlug, element: persona.elKey });
+
+    showScreen("screen-result");
+  }
+
   /* ---------- URL 파라미터로 결과 바로 열기 (공유 링크) ---------- */
   function tryLoadFromQuery(){
     var qs = new URLSearchParams(location.search);
-    if (!qs.has("y") || !qs.has("m") || !qs.has("d")) return false;
-    var y = parseInt(qs.get("y"),10), m = parseInt(qs.get("m"),10), d = parseInt(qs.get("d"),10);
+
+    // 새 포맷(개인정보 보호) — 결과(페르소나) 코드만 담겨있어요. 예: ?r=wood-yang
+    if (qs.has("r")){
+      var parts = String(qs.get("r")||"").toLowerCase().split("-");
+      var elKey = ROM_TO_EL[parts[0]];
+      var yy = parts[1] === "yang" ? "양" : (parts[1] === "yin" ? "음" : null);
+      if (elKey && yy && PERSONA[elKey] && PERSONA[elKey][yy]){
+        renderSharedPersonaResult(elKey, yy);
+        return true;
+      }
+      // 알 수 없는 코드면 무시하고 아래 구버전/인트로 흐름으로 넘어가요.
+    }
+
+    // 구버전 포맷(이 수정 이전에 이미 공유된 링크와의 호환용) — 생년월일시가
+    // 그대로 담겨있어요. 새로 만드는 공유 링크는 이제 전부 위 ?r= 포맷을 써요.
+    // 주소창에서는 <head>의 스크립트가 이미 y/m/d/hh/mm을 지웠기 때문에(분석
+    // 스크립트가 못 보게), 여기서는 그때 따로 보존해둔 window.__charanLegacyBirthQS
+    // 값으로 읽어요 — location.search에는 이제 이 값들이 없어요.
+    var legacyQs = new URLSearchParams(window.__charanLegacyBirthQS || "");
+    if (!legacyQs.has("y") || !legacyQs.has("m") || !legacyQs.has("d")) return false;
+    var y = parseInt(legacyQs.get("y"),10), m = parseInt(legacyQs.get("m"),10), d = parseInt(legacyQs.get("d"),10);
     if (!y || !m || !d) return false;
-    var hourKnown = qs.has("hh") && qs.has("mm");
-    var hh = hourKnown ? parseInt(qs.get("hh"),10) : 12;
-    var mm = hourKnown ? parseInt(qs.get("mm"),10) : 0;
+    var hourKnown = legacyQs.has("hh") && legacyQs.has("mm");
+    var hh = hourKnown ? parseInt(legacyQs.get("hh"),10) : 12;
+    var mm = hourKnown ? parseInt(legacyQs.get("mm"),10) : 0;
     state.birth = { y:y,m:m,d:d,hh:hh,mm:mm,hourKnown:hourKnown };
-    var pad = function(n){ return String(n).padStart(2,"0"); };
-    document.getElementById("birth-date").value = y+"-"+pad(m)+"-"+pad(d);
+    window.setBirthDateSelects(y, m, d);
     if (hourKnown){ setTimeSelectsFrom24h(hh, mm); }
     else { timeUnknownEl.checked = true; timeSelectEls.forEach(function(el){ el.disabled = true; }); }
     renderResult(state.birth);
@@ -1992,7 +2407,7 @@
   function boot(initial){
     if (initial && initial.birth){
       state = initial;
-      document.getElementById("birth-date").value = initial.birth.y+"-"+String(initial.birth.m).padStart(2,"0")+"-"+String(initial.birth.d).padStart(2,"0");
+      window.setBirthDateSelects(initial.birth.y, initial.birth.m, initial.birth.d);
       if (initial.birth.hourKnown){ setTimeSelectsFrom24h(initial.birth.hh, initial.birth.mm); }
       else { timeUnknownEl.checked = true; timeSelectEls.forEach(function(el){ el.disabled = true; }); }
       if (initial.saju){ renderResult(initial.birth); }
@@ -2014,8 +2429,7 @@
       var b = JSON.parse(saved);
       if (!b || !b.y || !b.m || !b.d) return false;
       state.birth = b;
-      var pad = function(n){ return String(n).padStart(2,"0"); };
-      document.getElementById("birth-date").value = b.y+"-"+pad(b.m)+"-"+pad(b.d);
+      window.setBirthDateSelects(b.y, b.m, b.d);
       if (b.hourKnown){ setTimeSelectsFrom24h(b.hh, b.mm); }
       else { timeUnknownEl.checked = true; timeSelectEls.forEach(function(el){ el.disabled = true; }); }
       renderResult(b);

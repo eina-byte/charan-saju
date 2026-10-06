@@ -208,6 +208,20 @@ var PERSONA_META = {
 };
 
 function personaFromQuery(url){
+  // 새 포맷(개인정보 보호) — 결과(페르소나) 코드만 담겨있어요. 예: ?r=wood-yang
+  // index.html의 tryLoadFromQuery()와 동일한 우선순위: 생년월일 계산이 필요 없어서
+  // 가장 먼저, 가장 가볍게 처리해요.
+  var r = url.searchParams.get("r");
+  if (r){
+    var slugFromR = String(r).toLowerCase();
+    if (PERSONA_META[slugFromR]){
+      return { slug: slugFromR, meta: PERSONA_META[slugFromR] };
+    }
+    // r이 있는데 못 알아보는 값이면 구버전 파라미터도 없을 거라 바로 null 처리
+    return null;
+  }
+
+  // 구버전 포맷 — 생년월일시가 쿼리에 그대로 담겨있던 예전 공유 링크용(하위 호환)
   var y = parseInt(url.searchParams.get("y"), 10);
   var m = parseInt(url.searchParams.get("m"), 10);
   var d = parseInt(url.searchParams.get("d"), 10);
