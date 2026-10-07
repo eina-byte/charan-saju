@@ -1726,7 +1726,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       shopLinkMid.hidden = true;
     }
 
-    var shareUrl = buildShareUrl(persona);
+    var shareUrl = buildShareUrl(persona, weak, hasLack);
     document.getElementById("share-link").value = shareUrl;
     state.shareText = "나는 \"" + persona.title + "\"래! 너의 추구미는 뭘까?";
     var xIntent = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(state.shareText) + "&url=" + encodeURIComponent(shareUrl);
@@ -1863,9 +1863,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // 평문으로 노출되는 걸 막기 위해, "결과(페르소나) 코드"만 담아요(예: ?r=wood-yang).
   // 링크를 열어본 사람은 그 결과 카드(타이틀/설명/아이템 등)만 보고, 개인 오행
   // 차트·표처럼 실제 생년월일이 있어야 계산되는 부분은 보이지 않아요.
-  function buildShareUrl(persona){
+  // 부족한 오행(w)도 함께 담아요 — 오행 이름 1개(예: w=water)라 생년월일은 알 수 없어요.
+  // 공유 링크를 연 사람 화면에도 "부족한 기운" 카드와 "부족한 오행 채우러 가기" 버튼을
+  // 보여주기 위해서예요. 균형 사주면 w=none. (w가 없는 예전 링크는 그 부분만 숨겨요.)
+  function buildShareUrl(persona, weak, hasLack){
     var base = location.href.split("?")[0].split("#")[0];
-    return base + "?r=" + encodeURIComponent(persona.charSlug);
+    var url = base + "?r=" + encodeURIComponent(persona.charSlug);
+    if (weak){
+      url += "&w=" + (hasLack ? ELEMENT_META[weak.key].romName.toLowerCase() : "none");
+    }
+    return url;
   }
 
   // "공유하기" — 예전의 카카오톡 공유 + 링크복사 두 버튼을 하나로 합쳤어요.
@@ -2269,7 +2276,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
      개인 오행 차트·표·부족한 기운·공유 패널처럼 실제 생년월일이 있어야 계산되는
      부분은 숨기고, 대신 "내 생년월일로 추구미 확인하기" 버튼으로 안내해요. */
   var ROM_TO_EL = { wood:"목", fire:"화", earth:"토", metal:"금", water:"수" };
-  function renderSharedPersonaResult(elKey, yy){
+  function renderSharedPersonaResult(elKey, yy, weakKey){
     var meta = ELEMENT_META[elKey];
     var variant = PERSONA[elKey][yy];
     var persona = {
@@ -2277,7 +2284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       popHex: meta.popHex, yy: yy,
       title: variant.title, tagline: variant.tagline, desc: variant.desc, keywords: variant.keywords,
       strengthTip: variant.strengthTip, bestFor: variant.bestFor, actions: variant.actions, items: variant.items,
-      subtitle: meta.elName + "(" + meta.hanja + ") · " + yy + "(" + (yy==="양"?"陽":"陰") + ")의 기운"
+      subtitle: meta.elName + " · " + yy + "(" + (yy==="양"?"陽":"陰") + ")의 기운"
     };
     persona.charSlug = meta.romName.toLowerCase() + "-" + (yy === "양" ? "yang" : "yin");
     state.saju = null; state.dominant = null; state.persona = persona; state.yy = yy;
@@ -2359,7 +2366,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       shopLinkMidLabel.textContent = persona.elName + " 기획전 준비중이에요";
       shopLinkMid.hidden = true;
     }
-    document.getElementById("shop-link").hidden = true;
+    // 링크에 부족한 오행(w=water 등)이 담겨 있으면, 내 결과 화면과 똑같이
+    // "부족한 기운" 카드 + 하단 "부족한 오행 채우러 가기" 버튼을 보여줘요.
+    // (w가 없거나 none/알 수 없는 값이면 지금처럼 하단 버튼을 숨겨요.)
+    var shopLinkEl = document.getElementById("shop-link");
+    var boostWrap = document.getElementById("boost-hero");
+    var shownWeak = false;
+    if (weakKey && SHOP_LINK){
+      try{
+        var wObj = new URL(SHOP_LINK, location.href);
+        wObj.searchParams.set(SHOP_LINK_TYPE_PARAM, persona.romName.toLowerCase());
+        addUtmParams(wObj, "shop-link-shared");
+        wObj.searchParams.set("boost", ELEMENT_META[weakKey].romName.toLowerCase());
+        var wHash = SHOP_TAB_HASH[weakKey];
+        if (wHash){ wObj.hash = wHash; }
+        buildBoostHero({ key: weakKey, min: 0, tied: false, tiedWith: [weakKey] }, { max: 1 });
+        shopLinkEl.href = wObj.toString();
+        shopLinkEl.removeAttribute("aria-disabled");
+        shopLinkEl.classList.remove("cta-disabled");
+        shopLinkEl.querySelector(".shop-cta-label").textContent = "부족한 오행 채우러 가기";
+        shopLinkEl.hidden = false;
+        shownWeak = true;
+      }catch(e){}
+    }
+    if (!shownWeak){
+      boostWrap.hidden = true;
+      shopLinkEl.hidden = true;
+    }
 
     trackEvent("shared_link_visit", { persona_type: persona.charSlug, element: persona.elKey });
 
@@ -2376,7 +2409,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var elKey = ROM_TO_EL[parts[0]];
       var yy = parts[1] === "yang" ? "양" : (parts[1] === "yin" ? "음" : null);
       if (elKey && yy && PERSONA[elKey] && PERSONA[elKey][yy]){
-        renderSharedPersonaResult(elKey, yy);
+        var wKey = ROM_TO_EL[String(qs.get("w")||"").toLowerCase()] || null;
+        renderSharedPersonaResult(elKey, yy, wKey);
         return true;
       }
       // 알 수 없는 코드면 무시하고 아래 구버전/인트로 흐름으로 넘어가요.
